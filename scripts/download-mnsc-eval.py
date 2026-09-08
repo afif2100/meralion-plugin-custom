@@ -3,6 +3,7 @@
 
 import argparse
 import json
+import random
 import shutil
 import time
 import wave
@@ -35,6 +36,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--count", type=int, default=20)
     parser.add_argument("--output", type=Path, default=ROOT / "testdata/mnsc-asr-part1")
+    parser.add_argument("--seed", type=int, default=0)
     args = parser.parse_args()
 
     first = rows(0)
@@ -46,11 +48,13 @@ def main():
     args.output.mkdir(parents=True, exist_ok=True)
 
     manifest = []
-    width = total // args.count
-    for start in (i * width for i in range(args.count)):
+    selected = set()
+    for start in random.Random(args.seed).sample(range(total), args.count):
         candidates = first["rows"] if start == 0 else rows(start)["rows"]
         for row in candidates:
             index = row["row_idx"]
+            if index in selected:
+                continue
             item = row["row"]
             audio = args.output / f"{index:04d}.wav"
             with urlopen(item["context"][0]["src"], timeout=120) as response, audio.open("wb") as output:
@@ -60,8 +64,10 @@ def main():
             if not 5 <= duration <= 30:
                 audio.unlink()
                 continue
+            selected.add(index)
             manifest.append({
                 "dataset": DATASET,
+                "seed": args.seed,
                 "config": CONFIG,
                 "split": SPLIT,
                 "row": index,
