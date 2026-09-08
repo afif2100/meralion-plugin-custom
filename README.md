@@ -20,6 +20,14 @@ python scripts/download-mnsc-eval.py
 
 Downloads 20 transcripted 5–30s clips from [MERaLiON MNSC v1](https://huggingface.co/datasets/MERaLiON/Multitask-National-Speech-Corpus-v1) into ignored `testdata/mnsc-asr-part1/`. `manifest.jsonl` records source rows and transcripts. Same MERaLiON publisher: use for regression, not independent benchmark claims.
 
+With server running, calculate word error rate (WER):
+
+```bash
+python scripts/evaluate-asr.py
+```
+
+Writes ignored per-clip predictions to `testdata/mnsc-asr-part1/results.jsonl` and prints aggregate WER.
+
 ## Local assets
 
 These are deliberately excluded from Git:
