@@ -37,8 +37,9 @@ Run models one at a time on this 16 GiB GPU, saving separate result files:
 ./scripts/serve-v0.16.sh
 python scripts/evaluate-asr.py --output testdata/mnsc-asr-part1/results-v2.jsonl
 
-# Stop v2, then MERaLiON 3 (downloads weights on first start)
+# Stop v2, then download and run MERaLiON 3 locally
 uv sync --extra v3 --python 3.12
+python scripts/download-v3-model.py
 ./scripts/serve-v3.sh
 MERALION_API_URL=http://127.0.0.1:8001 python scripts/evaluate-asr.py \
   --protocol transcriptions \
