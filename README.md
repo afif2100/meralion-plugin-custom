@@ -12,6 +12,14 @@ python scripts/test-asr.py testdata/librispeech-sample.flac
 
 Server listens on `http://127.0.0.1:8000`. Default target is a 16 GiB GPU; it uses online FP8 weights and limits context to 2560 tokens.
 
+## Singapore ASR regression audio
+
+```bash
+python scripts/download-mnsc-eval.py
+```
+
+Downloads 20 transcripted 5–30s clips from [MERaLiON MNSC v1](https://huggingface.co/datasets/MERaLiON/Multitask-National-Speech-Corpus-v1) into ignored `testdata/mnsc-asr-part1/`. `manifest.jsonl` records source rows and transcripts. Same MERaLiON publisher: use for regression, not independent benchmark claims.
+
 ## Local assets
 
 These are deliberately excluded from Git:

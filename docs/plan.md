@@ -33,7 +33,7 @@ Set ready-time SLO first (for example, <120 s). Before conversion, save 10-20 li
 - WER or manual transcript comparison;
 - output coverage for 60 s audio.
 
-Current `scripts/test-asr.py` and `testdata/librispeech-sample.flac` are smoke tests, not an accuracy suite.
+Current `scripts/test-asr.py`, `testdata/librispeech-sample.flac`, and the MNSC regression manifest are smoke tests, not an accuracy suite. MNSC shares MERaLiON provenance; do not present it as independent evaluation.
 
 ### 2. Preserve caches, then feasibility spike — isolated output only
 
