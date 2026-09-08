@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vllm-plugin-meralion3-v026"
+version = "0.1.0"
+description = "MERaLiON-3 ASR vLLM 0.26 compatibility plugin"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "librosa",
+  "packaging",
+  "vllm==0.26.*",
+]
+
+[project.entry-points."vllm.general_plugins"]
+register_meralion3_v026 = "vllm_plugin_meralion3:register"
+
+[project.entry-points."vllm.logits_processors"]
+NoRepeatNGramLogitsProcessor = "vllm_plugin_meralion3.transformers_utils.no_repeat_logits_processor:NoRepeatNGramV1LogitsProcessor"
+
+[tool.setuptools.packages.find]
+where = ["src"]
