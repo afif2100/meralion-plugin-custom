@@ -33,7 +33,7 @@ Set ready-time SLO first (for example, <120 s). Before conversion, save 10-20 li
 - WER or manual transcript comparison;
 - output coverage for 60 s audio.
 
-Current `test-meralion.py` and `testdata/librispeech-sample.flac` are smoke tests, not an accuracy suite.
+Current `scripts/test-asr.py` and `testdata/librispeech-sample.flac` are smoke tests, not an accuracy suite.
 
 ### 2. Preserve caches, then feasibility spike — isolated output only
 

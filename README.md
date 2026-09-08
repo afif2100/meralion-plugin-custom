@@ -6,8 +6,8 @@ Local vLLM runner for [MERaLiON-2-10B-ASR](https://huggingface.co/MERaLiON/MERaL
 
 ```bash
 uv sync --python 3.12
-./serve-meralion.sh
-python test-meralion.py testdata/librispeech-sample.flac
+./scripts/serve-v0.16.sh
+python scripts/test-asr.py testdata/librispeech-sample.flac
 ```
 
 Server listens on `http://127.0.0.1:8000`. Default target is a 16 GiB GPU; it uses online FP8 weights and limits context to 2560 tokens.
@@ -25,7 +25,7 @@ Put MERaLiON model at `models/MERaLiON/MERaLiON-2-10B-ASR`. Install dependencies
 
 ## vLLM 0.26 experiment
 
-`./scripts/serve-meralion-v026.sh` starts v0.26 plugin setup on port 8001. Create its ignored environment first:
+`./scripts/serve-v0.26.sh` starts v0.26 plugin setup on port 8001. Create its ignored environment first:
 
 ```bash
 (cd plugins/vllm-plugin-meralion2-v026 && uv sync --python 3.12)
