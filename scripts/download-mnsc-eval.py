@@ -21,15 +21,15 @@ ROOT = Path(__file__).resolve().parent.parent
 
 def rows(offset: int, length: int = 100) -> dict:
     query = urlencode({"dataset": DATASET, "config": CONFIG, "split": SPLIT, "offset": offset, "length": length})
-    for wait in (1, 5, 15):
+    for wait in (3, 10, 30, 60, 120):
         try:
             with urlopen(f"{API}?{query}", timeout=60) as response:
                 return json.load(response)
         except HTTPError as error:
-            if error.code != 429:
+            if error.code not in (429, 500, 502, 503, 504):
                 raise
             time.sleep(wait)
-    raise SystemExit("Hugging Face dataset server rate-limited download; retry later")
+    raise SystemExit("Hugging Face dataset server remained unavailable; retry later")
 
 
 def main():
