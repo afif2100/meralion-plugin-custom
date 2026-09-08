@@ -19,7 +19,7 @@ API = "https://datasets-server.huggingface.co/rows"
 ROOT = Path(__file__).resolve().parent.parent
 
 
-def rows(offset: int, length: int = 20) -> dict:
+def rows(offset: int, length: int = 100) -> dict:
     query = urlencode({"dataset": DATASET, "config": CONFIG, "split": SPLIT, "offset": offset, "length": length})
     for wait in (1, 5, 15):
         try:
@@ -47,38 +47,39 @@ def main():
         raise SystemExit(f"refusing non-empty output directory: {args.output}")
     args.output.mkdir(parents=True, exist_ok=True)
 
+    candidates = list(first["rows"])
+    for offset in range(100, total, 100):
+        time.sleep(3)  # Dataset Server permits about 20 requests per minute.
+        candidates.extend(rows(offset)["rows"])
+    random.Random(args.seed).shuffle(candidates)
+
     manifest = []
-    selected = set()
-    for start in random.Random(args.seed).sample(range(total), args.count):
-        candidates = first["rows"] if start == 0 else rows(start)["rows"]
-        for row in candidates:
-            index = row["row_idx"]
-            if index in selected:
-                continue
-            item = row["row"]
-            audio = args.output / f"{index:04d}.wav"
-            with urlopen(item["context"][0]["src"], timeout=120) as response, audio.open("wb") as output:
-                shutil.copyfileobj(response, output)
-            with wave.open(str(audio)) as wav:
-                duration = wav.getnframes() / wav.getframerate()
-            if not 5 <= duration <= 30:
-                audio.unlink()
-                continue
-            selected.add(index)
-            manifest.append({
-                "dataset": DATASET,
-                "seed": args.seed,
-                "config": CONFIG,
-                "split": SPLIT,
-                "row": index,
-                "audio": audio.name,
-                "seconds": round(duration, 3),
-                "transcript": item["answer"],
-            })
-            print(f"{audio.name}: {duration:.1f}s")
+    for row in candidates:
+        index = row["row_idx"]
+        item = row["row"]
+        audio = args.output / f"{index:04d}.wav"
+        with urlopen(item["context"][0]["src"], timeout=120) as response, audio.open("wb") as output:
+            shutil.copyfileobj(response, output)
+        with wave.open(str(audio)) as wav:
+            duration = wav.getnframes() / wav.getframerate()
+        if not 5 <= duration <= 30:
+            audio.unlink()
+            continue
+        manifest.append({
+            "dataset": DATASET,
+            "seed": args.seed,
+            "config": CONFIG,
+            "split": SPLIT,
+            "row": index,
+            "audio": audio.name,
+            "seconds": round(duration, 3),
+            "transcript": item["answer"],
+        })
+        print(f"{audio.name}: {duration:.1f}s")
+        if len(manifest) == args.count:
             break
-        else:
-            raise SystemExit(f"no 5–30s clip found after row {start}")
+    if len(manifest) != args.count:
+        raise SystemExit(f"found only {len(manifest)} clips within 5–30 seconds")
 
     (args.output / "manifest.jsonl").write_text("".join(json.dumps(row, ensure_ascii=False) + "\n" for row in manifest))
 
