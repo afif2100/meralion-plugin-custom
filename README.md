@@ -17,7 +17,7 @@ Server listens on `http://127.0.0.1:8000`. Default target is a 16 GiB GPU; it us
 These are deliberately excluded from Git:
 
 - `models/` — model checkpoints
-- `plugins/` — local custom vLLM plugin and its environment
+- `plugins/*/.venv/` — local plugin environments
 - `testdata/` — audio samples
 - `.venv/` and caches
 
@@ -25,4 +25,10 @@ Put MERaLiON model at `models/MERaLiON/MERaLiON-2-10B-ASR`. Install dependencies
 
 ## vLLM 0.26 experiment
 
-`./scripts/serve-meralion-v026.sh` starts local v0.26 plugin setup on port 8001. See [docs/plan.md](docs/plan.md) for FP8 and KV-cache constraints.
+`./scripts/serve-meralion-v026.sh` starts v0.26 plugin setup on port 8001. Create its ignored environment first:
+
+```bash
+(cd plugins/vllm-plugin-meralion2-v026 && uv sync --python 3.12)
+```
+
+See [docs/plan.md](docs/plan.md) for FP8 and KV-cache constraints.

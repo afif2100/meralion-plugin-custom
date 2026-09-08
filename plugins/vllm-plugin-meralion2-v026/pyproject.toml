@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vllm-plugin-meralion2-v026"
+version = "0.4.0.dev0"
+description = "MERaLiON-2 vLLM 0.26 compatibility plugin"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "librosa",
+  "packaging",
+  "vllm==0.26.*",
+]
+
+[project.entry-points."vllm.general_plugins"]
+register_meralion2_v026 = "vllm_plugin_meralion2:register"
+
+[project.entry-points."vllm.endpoint_plugins"]
+meralion_whisper_transcription = "vllm_plugin_meralion2.whisper_transcription:MERaLiONWhisperTranscriptionPlugin"
+
+[project.entry-points."vllm.logits_processors"]
+NoRepeatNGramLogitsProcessor = "vllm_plugin_meralion2.transformers_utils.no_repeat_logits_processor:NoRepeatNGramV1LogitsProcessor"
+
+[tool.setuptools.packages.find]
+where = ["src"]
