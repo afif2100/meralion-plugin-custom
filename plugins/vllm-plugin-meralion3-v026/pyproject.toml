@@ -21,3 +21,6 @@ NoRepeatNGramLogitsProcessor = "vllm_plugin_meralion3.transformers_utils.no_repe
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+vllm_plugin_meralion3 = ["configs/vllm/*.jinja", "configs/vllm/*.json"]

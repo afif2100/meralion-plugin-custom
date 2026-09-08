@@ -1,0 +1,30 @@
+services:
+  meralion-v3:
+    build: .
+    gpus: all
+    ipc: host
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./models/MERaLiON/MERaLiON-3-3B-ASR:/models/MERaLiON-3-3B-ASR:ro
+    command:
+      - /models/MERaLiON-3-3B-ASR
+      - --trust-remote-code
+      - --dtype
+      - bfloat16
+      - --gpu-memory-utilization
+      - "0.90"
+      - --max-model-len
+      - "1300"
+      - --max-num-seqs
+      - "1"
+      - --limit-mm-per-prompt
+      - '{"audio": 1}'
+      - --attention-backend
+      - FLASHINFER
+      - --chat-template
+      - /opt/meralion3-plugin/src/vllm_plugin_meralion3/configs/vllm/chat_template.jinja
+      - --chat-template-content-format
+      - string
+      - --override-generation-config
+      - '{"temperature": 0.0, "top_p": 1.0, "top_k": 50, "repetition_penalty": 1.0, "max_new_tokens": 512}'

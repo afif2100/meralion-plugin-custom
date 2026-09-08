@@ -49,6 +49,14 @@ MERALION_API_URL=http://127.0.0.1:8001 python scripts/evaluate-asr.py \
 
 Compare printed WER. This is deployment comparison: v2 uses current FP8 setup; v3 uses BF16.
 
+## Docker: V3 on vLLM 0.26
+
+```bash
+docker compose up --build
+```
+
+Uses official `vllm/vllm-openai:v0.26.0`, V3 compatibility plugin, local model mount, and GPU. OpenAI chat endpoint: `http://127.0.0.1:8001/v1`. Docker Desktop needs WSL integration and NVIDIA GPU access.
+
 ## Local assets
 
 These are deliberately excluded from Git:
