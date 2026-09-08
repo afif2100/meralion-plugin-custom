@@ -1,0 +1,16 @@
+# Local environments and caches
+.venv/
+__pycache__/
+*.py[cod]
+
+# Local runtime assets (large / generated)
+models/
+plugins/
+testdata/
+.pi/
+
+# Tooling output
+build/
+dist/
+*.egg-info/
+.pytest_cache/

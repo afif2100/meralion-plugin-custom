@@ -1,0 +1,12 @@
+[project]
+name = "meralion-vllm"
+version = "0.1.0"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "ninja",
+  "vllm==0.16.*",
+  "vllm-plugin-meralion2==0.3.*",
+]
+
+[project.optional-dependencies]
+quantize = ["llmcompressor"]
