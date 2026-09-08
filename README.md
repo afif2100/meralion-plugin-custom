@@ -28,6 +28,26 @@ python scripts/evaluate-asr.py
 
 Writes ignored per-clip predictions to `testdata/mnsc-asr-part1/results.jsonl` and prints aggregate WER.
 
+## MERaLiON 2 vs 3
+
+Run models one at a time on this 16 GiB GPU, saving separate result files:
+
+```bash
+# MERaLiON 2 baseline
+./scripts/serve-v0.16.sh
+python scripts/evaluate-asr.py --output testdata/mnsc-asr-part1/results-v2.jsonl
+
+# Stop v2, then MERaLiON 3 (downloads weights on first start)
+uv sync --extra v3 --python 3.12
+./scripts/serve-v3.sh
+MERALION_API_URL=http://127.0.0.1:8001 python scripts/evaluate-asr.py \
+  --protocol transcriptions \
+  --model MERaLiON/MERaLiON-3-3B-ASR \
+  --output testdata/mnsc-asr-part1/results-v3.jsonl
+```
+
+Compare printed WER. This is deployment comparison: v2 uses current FP8 setup; v3 uses BF16.
+
 ## Local assets
 
 These are deliberately excluded from Git:

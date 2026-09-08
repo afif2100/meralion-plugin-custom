@@ -29,20 +29,31 @@ def word_errors(reference: list[str], prediction: list[str]) -> int:
     return previous[-1]
 
 
-def transcribe(audio: Path, api_url: str, model: str) -> str:
-    encoded = base64.b64encode(audio.read_bytes()).decode()
-    payload = {
-        "model": model,
-        "messages": [{"role": "user", "content": [
-            {"type": "text", "text": PROMPT},
-            {"type": "audio_url", "audio_url": {"url": f"data:{MIME.get(audio.suffix.lower(), 'application/octet-stream')};base64,{encoded}"}},
-        ]}],
-        "max_completion_tokens": 256,
-        "temperature": 0,
-    }
-    request = Request(f"{api_url}/v1/chat/completions", data=json.dumps(payload).encode(), headers={"Content-Type": "application/json"})
+def transcribe(audio: Path, api_url: str, model: str, protocol: str) -> str:
+    if protocol == "chat":
+        encoded = base64.b64encode(audio.read_bytes()).decode()
+        payload = {
+            "model": model,
+            "messages": [{"role": "user", "content": [
+                {"type": "text", "text": PROMPT},
+                {"type": "audio_url", "audio_url": {"url": f"data:{MIME.get(audio.suffix.lower(), 'application/octet-stream')};base64,{encoded}"}},
+            ]}],
+            "max_completion_tokens": 256,
+            "temperature": 0,
+        }
+        request = Request(f"{api_url}/v1/chat/completions", data=json.dumps(payload).encode(), headers={"Content-Type": "application/json"})
+        with urlopen(request, timeout=300) as response:
+            return json.load(response)["choices"][0]["message"]["content"]
+
+    boundary = "----meralion-asr"
+    body = (
+        f"--{boundary}\r\nContent-Disposition: form-data; name=\"model\"\r\n\r\n{model}\r\n"
+        f"--{boundary}\r\nContent-Disposition: form-data; name=\"file\"; filename=\"{audio.name}\"\r\n"
+        f"Content-Type: {MIME.get(audio.suffix.lower(), 'application/octet-stream')}\r\n\r\n"
+    ).encode() + audio.read_bytes() + f"\r\n--{boundary}--\r\n".encode()
+    request = Request(f"{api_url}/v1/audio/transcriptions", data=body, headers={"Content-Type": f"multipart/form-data; boundary={boundary}"})
     with urlopen(request, timeout=300) as response:
-        return json.load(response)["choices"][0]["message"]["content"]
+        return json.load(response)["text"]
 
 
 def main():
@@ -50,6 +61,8 @@ def main():
     parser.add_argument("--manifest", type=Path, default=ROOT / "testdata/mnsc-asr-part1/manifest.jsonl")
     parser.add_argument("--output", type=Path, default=ROOT / "testdata/mnsc-asr-part1/results.jsonl")
     parser.add_argument("--limit", type=int)
+    parser.add_argument("--protocol", choices=("chat", "transcriptions"), default="chat")
+    parser.add_argument("--model", default=os.environ.get("MERALION_MODEL", str(ROOT / "models/MERaLiON/MERaLiON-2-10B-ASR")))
     args = parser.parse_args()
 
     if args.output.exists():
@@ -61,11 +74,11 @@ def main():
         raise SystemExit("manifest has no entries")
 
     api_url = os.environ.get("MERALION_API_URL", "http://127.0.0.1:8000")
-    model = os.environ.get("MERALION_MODEL", str(ROOT / "models/MERaLiON/MERaLiON-2-10B-ASR"))
+    model = args.model
     results = []
     for number, entry in enumerate(entries, 1):
         reference = tokens(entry["transcript"])
-        prediction = transcribe(args.manifest.parent / entry["audio"], api_url, model)
+        prediction = transcribe(args.manifest.parent / entry["audio"], api_url, model, args.protocol)
         actual = tokens(prediction)
         errors = word_errors(reference, actual)
         results.append({**entry, "prediction": prediction, "word_errors": errors, "reference_words": len(reference), "wer": errors / len(reference)})

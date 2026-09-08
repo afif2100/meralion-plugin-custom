@@ -10,3 +10,4 @@ dependencies = [
 
 [project.optional-dependencies]
 quantize = ["llmcompressor"]
+v3 = ["meralion-3-asr==0.1.*"]
